@@ -1,0 +1,60 @@
+model:
+  base_learning_rate: 4.5e-6
+  target: ldm.models.autoencoder.AutoencoderKL
+  params:
+    monitor: "val/rec_loss"
+    embed_dim: 8
+    lossconfig:
+      target: ldm.modules.losses.LPIPSWithDiscriminator
+      params:
+        disc_start: 999999999
+        kl_weight: 0.000001
+        disc_weight: 0.0
+        rec_start: 200001
+
+    ddconfig:
+      double_z: True
+      z_channels: 8
+      resolution: 128
+      in_channels: 3
+      out_ch: 3
+      ch: 32
+      ch_mult: [ 1,2,2,4,4 ]  # num_down = len(ch_mult)-1
+      # output feature map size 8
+      num_res_blocks: 2
+      attn_resolutions: [ 8,16 ]
+      dropout: 0.0
+
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    use_random_identity_sampler: true
+    random_identity_num: 4
+    batch_size: 192
+    wrap: True
+    num_workers: 0
+    train:
+      target: ldm.data.reid.UniPedTrainAll
+      params:
+        size: 128
+    validation:
+      target: ldm.data.reid.UniPedValidation
+      params:
+        size: 128
+    test:
+      target: ldm.data.reid.UniPedTest
+      params:
+        size: 128
+
+lightning:
+  callbacks:
+    image_logger:
+      target: main.ImageLogger
+      params:
+        batch_frequency: 1000
+        max_images: 8
+        increase_log_steps: true
+
+  trainer:
+    max_steps: 200000

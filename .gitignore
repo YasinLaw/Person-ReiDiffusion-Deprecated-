@@ -1,0 +1,4 @@
+data/reid/imgs/
+.DS_Store
+/logs
+/lightning_logs

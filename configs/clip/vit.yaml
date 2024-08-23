@@ -1,0 +1,28 @@
+model:
+  base_learning_rate: 5e-5
+  target: ldm.modules.encoders.modules.CLIPReIDEmbedder
+  params:
+    version: "ViT-B/16"
+    monitor: "val/loss"
+
+data:
+  target: main.DataModuleFromConfig
+  params:
+    use_random_identity_sampler: true
+    random_identity_num: 4
+    batch_size: 160
+    wrap: false
+    num_workers: 23
+    train:
+      target: ldm.data.reid.UniPedTrainAll
+    validation:
+      target: ldm.data.reid.UniPedValidation
+    test:
+      target: ldm.data.reid.UniPedTest
+
+lightning:
+  trainer:
+    accelerator: cuda
+#    max_epochs: 10
+    max_epochs: 10
+
